@@ -1,26 +1,26 @@
+require('dotenv').config();
+console.log("Loaded JWT_SECRET:", process.env.JWT_SECRET); // debug
+
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const passwordRoutes = require('./routes/passwords');
 
-dotenv.config();
 
-const app = express();
+const app = express(); // <-- You forgot this line!
 
 // Middleware
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/passwords', passwordRoutes);
 
-// MongoDB Connection
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB connection error:", err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.error(err));
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-// Export app for testing 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
