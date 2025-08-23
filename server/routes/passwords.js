@@ -16,24 +16,38 @@ function encrypt(text) {
 }
 
 function decrypt(text) {
-  if (!text.includes(":")) {
-    // Already plain text, return as is
-    return text;
+  try {
+    console.log("Decrypting text:", text);
+
+    if (!text.includes(":")) {
+      // Already plain text, return as is
+      console.log("Text doesn't contain ':', returning as plain text");
+      return text;
+    }
+
+    const [ivHex, encryptedText] = text.split(":");
+    console.log("IV hex:", ivHex);
+    console.log("Encrypted text:", encryptedText);
+
+    const iv = Buffer.from(ivHex, "hex");
+    const encryptedTextBuffer = Buffer.from(encryptedText, "hex");
+
+    const decipher = crypto.createDecipheriv(
+      "aes-256-cbc",
+      Buffer.from(ENCRYPTION_KEY),
+      iv
+    );
+
+    let decrypted = decipher.update(encryptedTextBuffer);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    const result = decrypted.toString();
+    console.log("Decrypted result:", result);
+    return result;
+  } catch (error) {
+    console.error("Decryption error:", error);
+    console.error("Failed to decrypt text:", text);
+    return text; // Return original text if decryption fails
   }
-
-  const [ivHex, encryptedText] = text.split(":");
-  const iv = Buffer.from(ivHex, "hex");
-  const encryptedTextBuffer = Buffer.from(encryptedText, "hex");
-
-  const decipher = crypto.createDecipheriv(
-    "aes-256-cbc",
-    Buffer.from(ENCRYPTION_KEY),
-    iv
-  );
-
-  let decrypted = decipher.update(encryptedTextBuffer);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
 }
 
 
