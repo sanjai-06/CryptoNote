@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   // For Gmail, you'll need to use App Passwords
   // For development, you can use Ethereal Email (fake SMTP)
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
     port: process.env.EMAIL_PORT || 587,
     secure: false, // true for 465, false for other ports
