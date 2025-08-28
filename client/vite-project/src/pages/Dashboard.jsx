@@ -6,13 +6,24 @@ import ChangePasswordModal from "../components/ChangePasswordModal";
 
 export default function Dashboard() {
   const [passwords, setPasswords] = useState([]);
-  const [form, setForm] = useState({ website: "", username: "", password: "" });
+  const [form, setForm] = useState({ website: "", username: "", password: "", category: "Personal" });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPasswords, setShowPasswords] = useState({});
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const navigate = useNavigate();
+
+  const categories = ["Personal", "Work", "Social", "Finance", "Entertainment", "Other"];
+  const categoryIcons = {
+    Personal: "👤",
+    Work: "💼",
+    Social: "👥",
+    Finance: "💰",
+    Entertainment: "🎮",
+    Other: "📁"
+  };
 
   // Fetch passwords on component mount
   useEffect(() => {
@@ -49,7 +60,7 @@ export default function Dashboard() {
         const res = await API.post("/passwords", form);
         setPasswords([...passwords, res.data]);
       }
-      setForm({ website: "", username: "", password: "" });
+      setForm({ website: "", username: "", password: "", category: "Personal" });
     } catch (err) {
       setError(err.response?.data?.message || "Operation failed");
     } finally {
@@ -61,7 +72,8 @@ export default function Dashboard() {
     setForm({
       website: password.website,
       username: password.username,
-      password: password.password
+      password: password.password,
+      category: password.category || "Personal"
     });
     setEditingId(password._id);
   };
@@ -94,6 +106,11 @@ export default function Dashboard() {
     // You could add a toast notification here
   };
 
+  // Filter passwords based on selected category
+  const filteredPasswords = selectedCategory === "All"
+    ? passwords
+    : passwords.filter(password => password.category === selectedCategory);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       {/* Animated background */}
@@ -112,7 +129,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                  Password Vault
+                  CryptoNote
                 </h1>
                 <p className="text-gray-400">Manage your digital keys securely</p>
               </div>
@@ -147,7 +164,7 @@ export default function Dashboard() {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative">
                   <input
                     type="text"
@@ -191,6 +208,24 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
+
+                <div className="relative">
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full p-4 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 appearance-none"
+                    required
+                  >
+                    {categories.map(category => (
+                      <option key={category} value={category} className="bg-gray-800 text-white">
+                        {categoryIcons[category]} {category}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                    <span className="text-gray-400">📁</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -220,7 +255,7 @@ export default function Dashboard() {
                     type="button"
                     onClick={() => {
                       setEditingId(null);
-                      setForm({ website: "", username: "", password: "" });
+                      setForm({ website: "", username: "", password: "", category: "Personal" });
                     }}
                     className="px-6 py-3 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-xl text-gray-300 font-semibold transition-all duration-300"
                   >
@@ -231,22 +266,70 @@ export default function Dashboard() {
             </form>
           </div>
 
+          {/* Category Filter */}
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <span className="mr-2">🏷️</span>
+              Filter by Category
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setSelectedCategory("All")}
+                className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                  selectedCategory === "All"
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-gray-300"
+                }`}
+              >
+                📋 All ({passwords.length})
+              </button>
+              {categories.map(category => {
+                const count = passwords.filter(p => p.category === category).length;
+                return (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                      selectedCategory === category
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                        : "bg-white/10 hover:bg-white/20 text-gray-300"
+                    }`}
+                  >
+                    {categoryIcons[category]} {category} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Password Table */}
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-white/10">
               <h3 className="text-xl font-semibold flex items-center">
                 <span className="mr-2">🗂️</span>
-                Your Passwords ({passwords.length})
+                Your Passwords ({filteredPasswords.length})
+                {selectedCategory !== "All" && (
+                  <span className="ml-2 text-sm text-gray-400">
+                    - {selectedCategory} Category
+                  </span>
+                )}
               </h3>
             </div>
 
-            {passwords.length === 0 ? (
+            {filteredPasswords.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="w-24 h-24 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-4xl">🔐</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-300 mb-2">No passwords yet</h4>
-                <p className="text-gray-400 mb-6">Start building your secure vault by adding your first password above.</p>
+                <h4 className="text-xl font-semibold text-gray-300 mb-2">
+                  {selectedCategory === "All" ? "No passwords yet" : `No passwords in ${selectedCategory} category`}
+                </h4>
+                <p className="text-gray-400 mb-6">
+                  {selectedCategory === "All"
+                    ? "Start building your secure vault by adding your first password above."
+                    : `Add a password to the ${selectedCategory} category or select a different category.`
+                  }
+                </p>
                 <div className="inline-flex items-center text-purple-400">
                   <span className="mr-2">✨</span>
                   Your passwords are encrypted and secure
@@ -259,12 +342,13 @@ export default function Dashboard() {
                     <tr>
                       <th className="py-4 px-6 text-left text-gray-300 font-semibold">Website</th>
                       <th className="py-4 px-6 text-left text-gray-300 font-semibold">Username</th>
+                      <th className="py-4 px-6 text-left text-gray-300 font-semibold">Category</th>
                       <th className="py-4 px-6 text-left text-gray-300 font-semibold">Password</th>
                       <th className="py-4 px-6 text-left text-gray-300 font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {passwords.map((password, index) => (
+                    {filteredPasswords.map((password, index) => (
                       <tr
                         key={password._id}
                         className={`border-b border-white/10 hover:bg-white/5 transition-colors duration-200 ${
@@ -281,6 +365,12 @@ export default function Dashboard() {
                         </td>
                         <td className="py-4 px-6">
                           <span className="text-gray-300">{password.username}</span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center">
+                            <span className="text-lg mr-2">{categoryIcons[password.category || "Personal"]}</span>
+                            <span className="text-gray-300 font-medium">{password.category || "Personal"}</span>
+                          </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center space-x-3">

@@ -5,6 +5,7 @@ const passwordSchema = new mongoose.Schema({
   website: { type: String, required: true },
   username: { type: String, required: true },
   password: { type: String, required: true }, // Later we’ll encrypt this
+  category: { type: String, default: 'Personal', enum: ['Personal', 'Work', 'Social', 'Finance', 'Entertainment', 'Other'] },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Password', passwordSchema);
