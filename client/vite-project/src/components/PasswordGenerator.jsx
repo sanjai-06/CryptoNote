@@ -59,109 +59,146 @@ export default function PasswordGenerator({ onPasswordGenerated }) {
       <button
         type="button"
         onClick={() => setShowGenerator(!showGenerator)}
-        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded text-white text-sm"
+        className="p-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-purple-300 transition-all duration-200 hover:scale-110"
+        title="Generate secure password"
       >
-        🎲 Generate
+        🎲
       </button>
 
       {showGenerator && (
-        <div className="absolute top-full left-0 mt-2 bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-lg z-10 w-80">
-          <h3 className="text-lg font-semibold mb-3">Password Generator</h3>
-          
-          <div className="space-y-3">
+        <div className="absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-lg border border-white/20 rounded-2xl p-6 shadow-2xl z-50 w-96">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white flex items-center">
+              <span className="mr-2">🎲</span> Password Generator
+            </h3>
+            <button
+              onClick={() => setShowGenerator(false)}
+              className="p-1 text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm mb-1">Length: {options.length}</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm text-gray-300">Password Length</label>
+                <span className="text-purple-400 font-semibold">{options.length}</span>
+              </div>
               <input
                 type="range"
                 min="4"
                 max="50"
                 value={options.length}
                 onChange={(e) => setOptions({ ...options, length: parseInt(e.target.value) })}
-                className="w-full"
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={options.includeUppercase}
-                  onChange={(e) => setOptions({ ...options, includeUppercase: e.target.checked })}
-                  className="mr-2"
-                />
-                Uppercase (A-Z)
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={options.includeLowercase}
-                  onChange={(e) => setOptions({ ...options, includeLowercase: e.target.checked })}
-                  className="mr-2"
-                />
-                Lowercase (a-z)
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={options.includeNumbers}
-                  onChange={(e) => setOptions({ ...options, includeNumbers: e.target.checked })}
-                  className="mr-2"
-                />
-                Numbers (0-9)
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={options.includeSymbols}
-                  onChange={(e) => setOptions({ ...options, includeSymbols: e.target.checked })}
-                  className="mr-2"
-                />
-                Symbols (!@#$...)
-              </label>
+            <div className="space-y-3">
+              <p className="text-sm text-gray-300 font-medium">Character Types:</p>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={options.includeUppercase}
+                    onChange={(e) => setOptions({ ...options, includeUppercase: e.target.checked })}
+                    className="mr-3 w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-white">ABC</div>
+                    <div className="text-xs text-gray-400">Uppercase</div>
+                  </div>
+                </label>
+
+                <label className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={options.includeLowercase}
+                    onChange={(e) => setOptions({ ...options, includeLowercase: e.target.checked })}
+                    className="mr-3 w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-white">abc</div>
+                    <div className="text-xs text-gray-400">Lowercase</div>
+                  </div>
+                </label>
+
+                <label className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={options.includeNumbers}
+                    onChange={(e) => setOptions({ ...options, includeNumbers: e.target.checked })}
+                    className="mr-3 w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-white">123</div>
+                    <div className="text-xs text-gray-400">Numbers</div>
+                  </div>
+                </label>
+
+                <label className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={options.includeSymbols}
+                    onChange={(e) => setOptions({ ...options, includeSymbols: e.target.checked })}
+                    className="mr-3 w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-white">!@#</div>
+                    <div className="text-xs text-gray-400">Symbols</div>
+                  </div>
+                </label>
+              </div>
             </div>
 
             <button
               onClick={generatePassword}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-semibold"
+              className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-[1.02]"
             >
-              Generate Password
+              <span className="mr-2">🎲</span> Generate Password
             </button>
 
             {generatedPassword && (
-              <div className="space-y-2">
-                <div className="p-2 bg-gray-800 rounded font-mono text-sm break-all">
-                  {generatedPassword}
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className={`text-${strength.color}-400 text-sm`}>
-                    Strength: {strength.text}
-                  </span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => navigator.clipboard.writeText(generatedPassword)}
-                      className="px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      onClick={usePassword}
-                      className="px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs"
-                    >
-                      Use This
-                    </button>
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-800/50 border border-white/10 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-300">Generated Password:</span>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        strength.color === 'red' ? 'bg-red-500' :
+                        strength.color === 'yellow' ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}></div>
+                      <span className={`text-sm font-medium ${
+                        strength.color === 'red' ? 'text-red-400' :
+                        strength.color === 'yellow' ? 'text-yellow-400' : 'text-green-400'
+                      }`}>
+                        {strength.text}
+                      </span>
+                    </div>
                   </div>
+                  <div className="p-3 bg-gray-900/50 rounded-lg font-mono text-sm break-all text-white border border-white/10">
+                    {generatedPassword}
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(generatedPassword)}
+                    className="flex-1 py-2 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-600/30 rounded-lg text-gray-300 font-medium transition-all duration-200"
+                  >
+                    <span className="mr-2">📋</span> Copy
+                  </button>
+                  <button
+                    onClick={usePassword}
+                    className="flex-1 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 rounded-lg text-green-300 font-medium transition-all duration-200"
+                  >
+                    <span className="mr-2">✅</span> Use This
+                  </button>
                 </div>
               </div>
             )}
           </div>
-
-          <button
-            onClick={() => setShowGenerator(false)}
-            className="absolute top-2 right-2 text-gray-400 hover:text-white"
-          >
-            ✕
-          </button>
         </div>
       )}
     </div>
