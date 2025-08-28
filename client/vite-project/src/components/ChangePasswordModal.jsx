@@ -11,6 +11,11 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordValidation, setPasswordValidation] = useState(null);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +63,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
     setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     setError("");
     setPasswordValidation(null);
+    setShowPasswords({ current: false, new: false, confirm: false });
     onClose();
   };
 
@@ -89,14 +95,22 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
           {/* Current Password */}
           <div className="relative">
             <input
-              type="password"
+              type={showPasswords.current ? "text" : "password"}
               placeholder="Current master password"
               value={form.currentPassword}
               onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
-              className="w-full p-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+              className="w-full p-4 pr-20 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
               required
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-4">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title={showPasswords.current ? "Hide password" : "Show password"}
+              >
+                {showPasswords.current ? "🙈" : "👁️"}
+              </button>
               <span className="text-gray-400">🔒</span>
             </div>
           </div>
@@ -104,19 +118,27 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
           {/* New Password */}
           <div className="relative">
             <input
-              type="password"
+              type={showPasswords.new ? "text" : "password"}
               placeholder="New master password"
               value={form.newPassword}
               onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-              className="w-full p-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+              className="w-full p-4 pr-20 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
               required
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-4">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title={showPasswords.new ? "Hide password" : "Show password"}
+              >
+                {showPasswords.new ? "🙈" : "👁️"}
+              </button>
               <span className="text-gray-400">🔑</span>
             </div>
-            
+
             {/* Password Strength Meter */}
-            <PasswordStrengthMeter 
+            <PasswordStrengthMeter
               password={form.newPassword}
               onValidation={setPasswordValidation}
             />
@@ -125,14 +147,22 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
           {/* Confirm Password */}
           <div className="relative">
             <input
-              type="password"
+              type={showPasswords.confirm ? "text" : "password"}
               placeholder="Confirm new password"
               value={form.confirmPassword}
               onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-              className="w-full p-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+              className="w-full p-4 pr-20 bg-white/5 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
               required
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-4">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+                title={showPasswords.confirm ? "Hide password" : "Show password"}
+              >
+                {showPasswords.confirm ? "🙈" : "👁️"}
+              </button>
               <span className="text-gray-400">✓</span>
             </div>
             
