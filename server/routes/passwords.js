@@ -3,6 +3,8 @@ const router = express.Router();
 const crypto = require('crypto');
 const auth = require('../middleware/auth');
 const Password = require('../models/Password');
+const User = require('../models/User');
+const { sendPasswordChangeNotification } = require('../services/emailService');
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // must be 32 chars for aes-256
 const IV_LENGTH = 16; // AES block size
@@ -52,7 +54,6 @@ function decrypt(text) {
 
 
 // POST /api/passwords
-// POST /api/passwords
 router.post('/', auth, async (req, res) => {
   try {
     console.log("REQ.USER:", req.user);
@@ -70,6 +71,18 @@ router.post('/', auth, async (req, res) => {
     });
 
     const savedPassword = await newPassword.save();
+
+    // Send email notification
+    try {
+      const user = await User.findById(req.user.id);
+      if (user) {
+        await sendPasswordChangeNotification(user.email, user.username, 'created');
+      }
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the password creation if email fails
+    }
+
     res.json(savedPassword);
   } catch (err) {
     console.error("Error in /api/passwords:", err);
@@ -107,6 +120,18 @@ router.put('/:id', auth, async (req, res) => {
       { website, username, password: encryptedPassword },
       { new: true }
     );
+
+    // Send email notification
+    try {
+      const user = await User.findById(req.user.id);
+      if (user) {
+        await sendPasswordChangeNotification(user.email, user.username, 'updated');
+      }
+    } catch (emailError) {
+      console.error('Failed to send email notification:', emailError);
+      // Don't fail the password update if email fails
+    }
+
     res.json({
       ...updated._doc,
       password: decrypt(updated.password)
