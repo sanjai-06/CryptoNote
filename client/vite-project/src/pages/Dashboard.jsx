@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import PasswordGenerator from "../components/PasswordGenerator";
+import CategoryManager from "../components/CategoryManager";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 
 export default function Dashboard() {
   const [passwords, setPasswords] = useState([]);
-  const [form, setForm] = useState({ website: "", username: "", password: "", category: "Personal" });
+  const [categories, setCategories] = useState([]);
+  const [form, setForm] = useState({ website: "", username: "", password: "", category: "" });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -15,19 +17,10 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const navigate = useNavigate();
 
-  const categories = ["Personal", "Work", "Social", "Finance", "Entertainment", "Other"];
-  const categoryIcons = {
-    Personal: "👤",
-    Work: "💼",
-    Social: "👥",
-    Finance: "💰",
-    Entertainment: "🎮",
-    Other: "📁"
-  };
-
   // Fetch passwords on component mount
   useEffect(() => {
     fetchPasswords();
+    fetchCategories();
   }, []);
 
   const fetchPasswords = async () => {
@@ -42,6 +35,58 @@ export default function Dashboard() {
         setError("Failed to fetch passwords");
       }
     }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await API.get("/categories");
+      setCategories(res.data);
+
+      // If no categories exist, create default ones
+      if (res.data.length === 0) {
+        await createDefaultCategories();
+      }
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+      // Don't show error for categories as it's not critical
+    }
+  };
+
+  const createDefaultCategories = async () => {
+    const defaultCategories = [
+      { name: "Personal", icon: "👤", color: "#8B5CF6" },
+      { name: "Work", icon: "💼", color: "#3B82F6" },
+      { name: "Finance", icon: "💰", color: "#10B981" },
+      { name: "Social", icon: "👥", color: "#F59E0B" },
+      { name: "Entertainment", icon: "🎮", color: "#EC4899" },
+      { name: "Other", icon: "📁", color: "#6B7280" }
+    ];
+
+    try {
+      const createdCategories = [];
+      for (const category of defaultCategories) {
+        const res = await API.post("/categories", category);
+        createdCategories.push(res.data);
+      }
+      setCategories(createdCategories);
+    } catch (err) {
+      console.error("Failed to create default categories:", err);
+    }
+  };
+
+  const handleCategoryCreated = async (categoryData) => {
+    const res = await API.post("/categories", categoryData);
+    setCategories([...categories, res.data]);
+  };
+
+  const handleCategoryUpdated = async (categoryId, categoryData) => {
+    const res = await API.put(`/categories/${categoryId}`, categoryData);
+    setCategories(categories.map(cat => cat._id === categoryId ? res.data : cat));
+  };
+
+  const handleCategoryDeleted = async (categoryId) => {
+    await API.delete(`/categories/${categoryId}`);
+    setCategories(categories.filter(cat => cat._id !== categoryId));
   };
 
   const handleSubmit = async (e) => {
@@ -60,7 +105,7 @@ export default function Dashboard() {
         const res = await API.post("/passwords", form);
         setPasswords([...passwords, res.data]);
       }
-      setForm({ website: "", username: "", password: "", category: "Personal" });
+      setForm({ website: "", username: "", password: "", category: categories[0]?.name || "Personal" });
     } catch (err) {
       setError(err.response?.data?.message || "Operation failed");
     } finally {
@@ -217,8 +262,8 @@ export default function Dashboard() {
                     required
                   >
                     {categories.map(category => (
-                      <option key={category} value={category} className="bg-gray-800 text-white">
-                        {categoryIcons[category]} {category}
+                      <option key={category._id} value={category.name} className="bg-gray-800 text-white">
+                        {category.icon} {category.name}
                       </option>
                     ))}
                   </select>
@@ -255,7 +300,7 @@ export default function Dashboard() {
                     type="button"
                     onClick={() => {
                       setEditingId(null);
-                      setForm({ website: "", username: "", password: "", category: "Personal" });
+                      setForm({ website: "", username: "", password: "", category: categories[0]?.name || "Personal" });
                     }}
                     className="px-6 py-3 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 rounded-xl text-gray-300 font-semibold transition-all duration-300"
                   >
@@ -268,10 +313,18 @@ export default function Dashboard() {
 
           {/* Category Filter */}
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <span className="mr-2">🏷️</span>
-              Filter by Category
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <span className="mr-2">🏷️</span>
+                Filter by Category
+              </h3>
+              <CategoryManager
+                categories={categories}
+                onCategoryCreated={handleCategoryCreated}
+                onCategoryUpdated={handleCategoryUpdated}
+                onCategoryDeleted={handleCategoryDeleted}
+              />
+            </div>
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setSelectedCategory("All")}
@@ -284,18 +337,18 @@ export default function Dashboard() {
                 📋 All ({passwords.length})
               </button>
               {categories.map(category => {
-                const count = passwords.filter(p => p.category === category).length;
+                const count = passwords.filter(p => p.category === category.name).length;
                 return (
                   <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
+                    key={category._id}
+                    onClick={() => setSelectedCategory(category.name)}
                     className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                      selectedCategory === category
+                      selectedCategory === category.name
                         ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
                         : "bg-white/10 hover:bg-white/20 text-gray-300"
                     }`}
                   >
-                    {categoryIcons[category]} {category} ({count})
+                    {category.icon} {category.name} ({count})
                   </button>
                 );
               })}
@@ -368,7 +421,9 @@ export default function Dashboard() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center">
-                            <span className="text-lg mr-2">{categoryIcons[password.category || "Personal"]}</span>
+                            <span className="text-lg mr-2">
+                              {categories.find(cat => cat.name === password.category)?.icon || "📁"}
+                            </span>
                             <span className="text-gray-300 font-medium">{password.category || "Personal"}</span>
                           </div>
                         </td>

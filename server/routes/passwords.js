@@ -59,7 +59,7 @@ router.post('/', auth, async (req, res) => {
     console.log("REQ.USER:", req.user);
     console.log("BODY:", req.body);
 
-    const { website, username, password } = req.body;
+    const { website, username, password, category } = req.body;
 
     const encryptedPassword = encrypt(password);
 
@@ -67,7 +67,8 @@ router.post('/', auth, async (req, res) => {
       userId: req.user.id,
       website,
       username,
-      password: encryptedPassword
+      password: encryptedPassword,
+      category: category || 'Personal'
     });
 
     const savedPassword = await newPassword.save();
@@ -113,11 +114,11 @@ router.get('/', auth, async (req, res) => {
 // PUT /api/passwords/:id
 router.put('/:id', auth, async (req, res) => {
   try {
-    const { website, username, password } = req.body;
+    const { website, username, password, category } = req.body;
     const encryptedPassword = encrypt(password);
     const updated = await Password.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { website, username, password: encryptedPassword },
+      { website, username, password: encryptedPassword, category: category || 'Personal' },
       { new: true }
     );
 

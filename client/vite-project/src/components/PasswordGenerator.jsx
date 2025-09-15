@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function PasswordGenerator({ onPasswordGenerated }) {
   const [options, setOptions] = useState({
@@ -65,8 +66,15 @@ export default function PasswordGenerator({ onPasswordGenerated }) {
         🎲
       </button>
 
-      {showGenerator && (
-        <div className="absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-lg border border-white/20 rounded-2xl p-6 shadow-2xl z-50 w-96">
+      {showGenerator && createPortal(
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          onClick={() => setShowGenerator(false)}
+        >
+          <div
+            className="bg-gray-900/95 backdrop-blur-lg border border-white/20 rounded-2xl p-6 shadow-2xl w-96 max-w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white flex items-center">
               <span className="mr-2">🎲</span> Password Generator
@@ -200,6 +208,8 @@ export default function PasswordGenerator({ onPasswordGenerated }) {
             )}
           </div>
         </div>
+        </div>,
+        document.body
       )}
     </div>
   );
