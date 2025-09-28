@@ -24,3 +24,4 @@ server/ - Express backend
 git clone https://github.com/your-username/cryptonote.git
 cd cryptonote
 # then see README for client/server setup
+

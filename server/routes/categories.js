@@ -1,7 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const { body, param, validationResult } = require('express-validator');
 const auth = require('../middleware/auth');
 const Category = require('../models/Category');
+
+const handleValidation = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
+  }
+  next();
+};
 
 // GET /api/categories - Get all categories for the user
 router.get('/', auth, async (req, res) => {
@@ -15,7 +24,16 @@ router.get('/', auth, async (req, res) => {
 });
 
 // POST /api/categories - Create a new category
-router.post('/', auth, async (req, res) => {
+router.post(
+  '/',
+  auth,
+  [
+    body('name').isString().trim().isLength({ min: 1, max: 100 }),
+    body('icon').optional().isString().isLength({ min: 0, max: 10 }),
+    body('color').optional().isString().isLength({ min: 0, max: 20 })
+  ],
+  handleValidation,
+  async (req, res) => {
   try {
     const { name, icon, color } = req.body;
 
@@ -49,7 +67,17 @@ router.post('/', auth, async (req, res) => {
 });
 
 // PUT /api/categories/:id - Update a category
-router.put('/:id', auth, async (req, res) => {
+router.put(
+  '/:id',
+  auth,
+  [
+    param('id').isString().isLength({ min: 1 }),
+    body('name').isString().trim().isLength({ min: 1, max: 100 }),
+    body('icon').optional().isString().isLength({ min: 0, max: 10 }),
+    body('color').optional().isString().isLength({ min: 0, max: 20 })
+  ],
+  handleValidation,
+  async (req, res) => {
   try {
     const { name, icon, color } = req.body;
 
@@ -90,7 +118,12 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // DELETE /api/categories/:id - Delete a category
-router.delete('/:id', auth, async (req, res) => {
+router.delete(
+  '/:id',
+  auth,
+  [param('id').isString().isLength({ min: 1 })],
+  handleValidation,
+  async (req, res) => {
   try {
     const deletedCategory = await Category.findOneAndDelete({ 
       _id: req.params.id, 

@@ -5,12 +5,24 @@ const User = require('../models/User');
 const auth = require('../middleware/auth');
 const { validatePasswordStrength, isStrongMasterPassword } = require('../utils/passwordValidator');
 const { sendMasterPasswordChangeNotification } = require('../services/emailService');
+const { body, validationResult } = require('express-validator');
 
 const router = express.Router();
 
 // REGISTER
-router.post('/register', async (req, res) => {
+router.post(
+  '/register',
+  [
+    body('username').isString().trim().isLength({ min: 3, max: 50 }),
+    body('email').isString().trim().isEmail().isLength({ max: 254 }),
+    body('password').isString().isLength({ min: 8, max: 500 })
+  ],
+  async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
+    }
     const { username, email, password } = req.body;
 
     // Validate password strength for master password
@@ -48,8 +60,18 @@ router.post('/register', async (req, res) => {
 });
 
 // LOGIN
-router.post('/login', async (req, res) => {
+router.post(
+  '/login',
+  [
+    body('email').isString().trim().isEmail().isLength({ max: 254 }),
+    body('password').isString().isLength({ min: 1, max: 500 })
+  ],
+  async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
+    }
     const { email, password } = req.body;
 
     // Check user
@@ -70,8 +92,19 @@ router.post('/login', async (req, res) => {
 });
 
 // CHANGE MASTER PASSWORD
-router.put('/change-password', auth, async (req, res) => {
+router.put(
+  '/change-password',
+  auth,
+  [
+    body('currentPassword').isString().isLength({ min: 1, max: 500 }),
+    body('newPassword').isString().isLength({ min: 8, max: 500 })
+  ],
+  async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: 'Validation failed', errors: errors.array() });
+    }
     const { currentPassword, newPassword } = req.body;
 
     // Get user

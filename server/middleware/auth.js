@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
 function authMiddleware(req, res, next) {
   const token = req.header('Authorization')?.split(' ')[1]; // Expecting "Bearer <token>"
