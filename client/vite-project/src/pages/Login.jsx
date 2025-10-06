@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../api/axios";
+import TwoFactorAuth from "../components/TwoFactorAuth";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [tempToken, setTempToken] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,13 +19,52 @@ export default function Login() {
 
     try {
       const res = await API.post("/auth/login", form);
+      
+      console.log("Login response:", res.data); // Debug log
+      
+      // Force 2FA setup for normal users if required by policy
+      if (res.data.requires2FASetup) {
+        console.log("2FA setup required, opening setup modal");
+        setTempToken(res.data.tempToken);
+        setShow2FA(true);
+        setLoading(false);
+        return;
+      }
+
+      // Check if 2FA verification is required
+      if (res.data.requires2FA) {
+        console.log("2FA verification required, showing modal");
+        setTempToken(res.data.tempToken);
+        setShow2FA(true);
+        setLoading(false);
+        return;
+      }
+      
+      // Direct login (no 2FA)
+      console.log("Direct login, no 2FA required"); // Debug log
       localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      const role = res?.data?.user?.role;
+      navigate(role === 'admin' ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handle2FASuccess = (data) => {
+    // data may contain token and user when verifying
+    if (data?.token) {
+      localStorage.setItem("token", data.token);
+    }
+    setShow2FA(false);
+    const role = data?.user?.role;
+    navigate(role === 'admin' ? "/admin" : "/dashboard");
+  };
+
+  const handle2FAClose = () => {
+    setShow2FA(false);
+    setTempToken("");
   };
 
   return (
@@ -136,6 +178,15 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* Two-Factor Authentication Modal */}
+      <TwoFactorAuth
+        isOpen={show2FA}
+        onClose={handle2FAClose}
+        onSuccess={handle2FASuccess}
+        email={form.email}
+        tempToken={tempToken}
+      />
     </div>
   );
 }
