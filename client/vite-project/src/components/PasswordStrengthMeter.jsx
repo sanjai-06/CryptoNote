@@ -40,7 +40,7 @@ export default function PasswordStrengthMeter({ password, onValidation, isMaster
         isValid: false,
         isValidMasterPassword: false,
       }));
-      onValidation?.(false);
+      onValidation?.(null);
       return;
     }
 
@@ -49,7 +49,7 @@ export default function PasswordStrengthMeter({ password, onValidation, isMaster
       try {
         const result = checkPasswordStrength(password);
         setStrength(result);
-        onValidation?.(isMasterPassword ? result.isValidMasterPassword : result.isValid);
+        onValidation?.(result);
       } catch (error) {
         console.error('Password validation error:', error);
       } finally {

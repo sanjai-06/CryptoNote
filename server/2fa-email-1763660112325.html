@@ -1,0 +1,85 @@
+
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>2FA Setup - CryptoNote</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+          .qr-section { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #e9ecef; }
+          .backup-codes { background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .code-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+          .backup-code { background: #fff; padding: 10px; border-radius: 4px; font-family: monospace; font-weight: bold; text-align: center; border: 1px solid #ddd; }
+          .warning { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          .steps { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .step { margin: 15px 0; padding: 10px; border-left: 4px solid #667eea; }
+          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🔐 Two-Factor Authentication Setup</h1>
+          <p>Secure your CryptoNote account with 2FA</p>
+        </div>
+        
+        <div class="content">
+          <p>Hello <strong>SANJAI</strong>,</p>
+          
+          <p>You've successfully enabled Two-Factor Authentication for your CryptoNote account. This adds an extra layer of security to protect your password vault.</p>
+          
+          <div class="qr-section">
+            <h3>📱 Step 1: Scan QR Code</h3>
+            <p>Use your authenticator app to scan this QR code:</p>
+            <img src="data:image/png;base64,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" alt="2FA QR Code" style="max-width: 200px; height: auto;">
+            <p><small>Recommended apps: Google Authenticator, Authy, Microsoft Authenticator</small></p>
+          </div>
+          
+          <div class="steps">
+            <h3>📋 Setup Instructions</h3>
+            <div class="step">
+              <strong>1.</strong> Download an authenticator app (Google Authenticator, Authy, etc.)
+            </div>
+            <div class="step">
+              <strong>2.</strong> Open the app and scan the QR code above
+            </div>
+            <div class="step">
+              <strong>3.</strong> If you can't scan, manually enter this secret key:<br>
+              <code style="background: #f8f9fa; padding: 5px; border-radius: 3px; font-family: monospace;">KRDXEUDEPM3UYPTTIZZTC5CONQWGEOK5NNGGOYZMJFKXAOBOJRWQ</code>
+            </div>
+            <div class="step">
+              <strong>4.</strong> Enter the 6-digit code from your app to complete setup
+            </div>
+          </div>
+          
+          <div class="backup-codes">
+            <h3>🔑 Backup Recovery Codes</h3>
+            <p><strong>Important:</strong> Save these backup codes in a secure location. Each code can only be used once.</p>
+            <div class="code-grid">
+              <div class="backup-code">mmprx6uq</div><div class="backup-code">zhjqkd18</div><div class="backup-code">o743bi78</div><div class="backup-code">btdhl2yf</div><div class="backup-code">5w97tou2</div><div class="backup-code">anxs20go</div><div class="backup-code">w72gqy6y</div><div class="backup-code">eyvrgc0x</div>
+            </div>
+            <p><small>Use these codes if you lose access to your authenticator app.</small></p>
+          </div>
+          
+          <div class="warning">
+            <h4>⚠️ Security Notice</h4>
+            <ul>
+              <li>Keep your backup codes secure and private</li>
+              <li>Each backup code can only be used once</li>
+              <li>Don't share your QR code or secret key with anyone</li>
+              <li>If you lose your authenticator device, use a backup code to login</li>
+            </ul>
+          </div>
+          
+          <p>If you didn't request this setup or have any concerns, please contact our support team immediately.</p>
+        </div>
+        
+        <div class="footer">
+          <p>This email was sent from CryptoNote Security System</p>
+          <p>© 2025 CryptoNote - Secure Password Manager</p>
+        </div>
+      </body>
+      </html>
+    

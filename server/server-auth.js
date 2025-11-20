@@ -28,6 +28,49 @@ const emailTransporter = nodemailer.createTransport({
   }
 });
 
+async function sendPasswordActivityEmail(user, action, details = {}) {
+  try {
+    if (!user?.email) return;
+    const wantsEmail = user.emailNotifications !== false;
+    const wantsSecurityAlerts = user.securityAlerts !== false;
+    if (!wantsEmail || !wantsSecurityAlerts) return;
+
+    const actionText = action === 'created' ? 'added to' : 'updated in';
+    const subject = action === 'created'
+      ? '🔐 CryptoNote - New Vault Entry Added'
+      : '🛡️ CryptoNote - Vault Entry Updated';
+
+    const mailOptions = {
+      from: process.env.SMTP_FROM || '"CryptoNote Security" <security@cryptonote.com>',
+      to: user.email,
+      subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+            <div style="max-width:600px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
+              <h2 style="margin-top:0;color:#0f172a;">Vault entry ${action === 'created' ? 'added' : 'updated'}</h2>
+              <p>Hello <strong>${user.username || 'CryptoNote user'}</strong>,</p>
+              <p>A password entry was ${actionText} your CryptoNote vault.</p>
+              <ul style="padding-left:20px;">
+                ${details.website ? `<li><strong>Entry:</strong> ${details.website}</li>` : ''}
+                <li><strong>Time:</strong> ${new Date().toLocaleString()}</li>
+              </ul>
+              <p>If this was you, no action is needed. If you didn’t perform this action, please sign in and review your vault immediately.</p>
+              <p style="margin-top:32px;font-size:14px;color:#475569;">This notification was sent because security alerts are enabled for your account.</p>
+            </div>
+          </body>
+        </html>
+      `
+    };
+
+    const info = await emailTransporter.sendMail(mailOptions);
+    logger.info('Password activity email sent', { to: user.email, action, messageId: info.messageId });
+  } catch (error) {
+    logger.warn('Password activity email failed', { error: error.message });
+  }
+}
+
 // Admin Routes
 // List users
 app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
@@ -381,7 +424,7 @@ const categorySchema = new mongoose.Schema({
 const Category = mongoose.model('Category', categorySchema);
 
 // JWT Middleware
-const authenticateToken = (req, res, next) => {
+function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -389,14 +432,18 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'dev_jwt_secret_32chars_min', (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET || 'dev_jwt_secret_32chars_min',
+    (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: 'Invalid or expired token' });
+      }
+      req.user = user;
+      next();
     }
-    req.user = user;
-    next();
-  });
-};
+  );
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
